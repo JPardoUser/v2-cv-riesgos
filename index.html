@@ -178,14 +178,6 @@
           </select>
         </div>
 
-        <!-- Tienda select filter -->
-        <div class="search-field grid-item-span-1">
-          <label for="filter-tienda">Tienda:</label>
-          <select id="filter-tienda" class="form-control">
-            <option>Seleccionar</option>
-          </select>
-        </div>
-
         <!-- Ejecutivo text filter -->
         <div class="search-field grid-item-span-1">
           <label for="filter-ejecutivo">Usuario (Ejecutivo):</label>
@@ -198,6 +190,14 @@
         <div class="search-field grid-item-span-1">
           <label for="filter-carretera">Carretera:</label>
           <select id="filter-carretera" class="form-control">
+            <option>Seleccionar</option>
+          </select>
+        </div>
+
+        <!-- Analista select filter -->
+        <div class="search-field grid-item-span-1">
+          <label for="filter-analista">Analista:</label>
+          <select id="filter-analista" class="form-control">
             <option>Seleccionar</option>
           </select>
         </div>
@@ -241,7 +241,6 @@
               <th>Número documento</th>
               <th>Cliente</th>
               <th>Concesionario</th>
-              <th>Sucursal</th>
               <th>Ejecutivo</th>
               <th>Fecha ingreso Riesgos</th>
               <th>
@@ -252,7 +251,7 @@
                   </svg>
                 </button>
               </th>
-              <th>Etapa</th>
+              <th>Analista</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -330,12 +329,12 @@
           <select id="sol-filter-concesionario" class="form-control"><option>Seleccionar</option></select>
         </div>
         <div class="search-field grid-item-span-1">
-          <label for="sol-filter-tienda">Sucursal:</label>
-          <select id="sol-filter-tienda" class="form-control"><option>Seleccionar</option></select>
-        </div>
-        <div class="search-field grid-item-span-1">
           <label for="sol-filter-ejecutivo">Usuario (Ejecutivo):</label>
           <input type="text" id="sol-filter-ejecutivo" class="form-control" placeholder="Buscar ejecutivo...">
+        </div>
+        <div class="search-field grid-item-span-1">
+          <label for="sol-filter-analista">Analista:</label>
+          <select id="sol-filter-analista" class="form-control"><option>Seleccionar</option></select>
         </div>
         <div class="search-field grid-item-span-1">
           <label for="sol-filter-estado">Estado:</label>
@@ -365,10 +364,9 @@
               <th>Número documento</th>
               <th>Cliente</th>
               <th>Concesionario</th>
-              <th>Sucursal</th>
               <th>Ejecutivo</th>
               <th>Fecha ingreso Riesgos</th>
-              <th>Etapa</th>
+              <th>Analista</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>

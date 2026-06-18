@@ -1835,3 +1835,17 @@ input[type="date"].form-control {
       "content";
   }
 }
+
+
+/* Analista asignado */
+.col-analista {
+  font-weight: 700 !important;
+  color: var(--text-dark);
+}
+
+.btn-revisar:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: #94a3b8;
+  box-shadow: none;
+}

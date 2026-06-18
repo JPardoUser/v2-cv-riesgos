@@ -15,8 +15,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   },
   {
@@ -34,8 +34,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   },
   {
@@ -53,8 +53,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   },
   {
@@ -72,8 +72,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   },
   {
@@ -91,8 +91,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   },
   {
@@ -110,8 +110,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   },
   {
@@ -129,8 +129,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   },
   {
@@ -148,8 +148,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   },
   {
@@ -167,8 +167,8 @@ const defaultRecords = [
     estado: 'Pendiente',
     estadoType: 'pendiente',
     comentarios: '',
-    analistaAsignado: 'María Fe Cárdenas',
-    usuarioAnalista: 'mcardenas',
+    analistaAsignado: '',
+    usuarioAnalista: '',
     etapa: 'Riesgos'
   }
 ];
@@ -219,6 +219,15 @@ const statusIcons = {
 };
 
 const usuarioAnalistaSesion = 'mcardenas';
+const nombreAnalistaSesion = 'María Fe Cárdenas';
+const RECORDS_STORAGE_VERSION = 'analista-asignado-v2';
+
+// Reinicia la data mock una sola vez para que las solicitudes no nazcan tomadas por defecto.
+if (localStorage.getItem('efectiva_records_version') !== RECORDS_STORAGE_VERSION) {
+  records = records.map(r => ({ ...r, analistaAsignado: '', usuarioAnalista: '' }));
+  localStorage.setItem('efectiva_records', JSON.stringify(records));
+  localStorage.setItem('efectiva_records_version', RECORDS_STORAGE_VERSION);
+}
 
 // Helper functions to map raw status values to requested status columns
 function getMappedEstado(estado) {
@@ -293,6 +302,7 @@ function initFilterDropdowns() {
     concesionario: new Set(),
     tienda: new Set(),
     carretera: new Set(),
+    analista: new Set(),
     estado: new Set()
   };
 
@@ -300,6 +310,7 @@ function initFilterDropdowns() {
     if (r.concesionario) selects.concesionario.add(r.concesionario);
     if (r.tienda) selects.tienda.add(r.tienda);
     if (r.carretera) selects.carretera.add(r.carretera);
+    if (r.analistaAsignado) selects.analista.add(r.analistaAsignado);
     if (r.estado) selects.estado.add(getMappedEstado(r.estado));
   });
 
@@ -449,7 +460,7 @@ function renderTable() {
     // Render Empty State
     tbody.innerHTML = `
       <tr>
-        <td colspan="12">
+        <td colspan="11">
           <div class="empty-state">
             <svg viewBox="0 0 24 24">
               <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
@@ -474,13 +485,12 @@ function renderTable() {
       <td>${record.nDocumento}</td>
       <td>${record.nombreCliente}</td>
       <td>${record.concesionario}</td>
-      <td>${record.tienda}</td>
       <td class="col-ejecutivo">${record.usuarioEjecutivo}</td>
       <td>${formatDate(record.fechaIngresoRiesgos)}</td>
       <td>
         <span class="sla-badge sla-${slaBadge.type}">${slaBadge.label}</span>
       </td>
-      <td>${record.etapa || 'Riesgos'}</td>
+      <td class="col-analista">${record.analistaAsignado || 'Sin asignar'}</td>
       <td>
         <span class="status-pill status-${getMappedEstadoType(record.estado)}">
           ${statusIcons[getMappedEstadoType(record.estado)] || ''}
@@ -505,9 +515,9 @@ function applyFilters() {
   const filterDocumento = document.getElementById('filter-documento').value.trim().toLowerCase();
   const filterCliente = document.getElementById('filter-cliente').value.trim().toLowerCase();
   const filterConcesionario = document.getElementById('filter-concesionario').value;
-  const filterTienda = document.getElementById('filter-tienda').value;
   const filterEjecutivo = document.getElementById('filter-ejecutivo').value.trim().toLowerCase();
   const filterCarretera = document.getElementById('filter-carretera').value;
+  const filterAnalista = document.getElementById('filter-analista')?.value || 'Seleccionar';
   const filterEstado = document.getElementById('filter-estado').value;
   const filterFechaDesde = document.getElementById('filter-fecha-desde').value;
   const filterFechaHasta = document.getElementById('filter-fecha-hasta').value;
@@ -538,15 +548,16 @@ function applyFilters() {
       return false;
     }
     // Tienda select filter
-    if (filterTienda !== 'Seleccionar' && record.tienda !== filterTienda) {
-      return false;
-    }
     // Ejecutivo text filter
     if (filterEjecutivo && !record.usuarioEjecutivo.toLowerCase().includes(filterEjecutivo)) {
       return false;
     }
     // Carretera select filter
     if (filterCarretera !== 'Seleccionar' && record.carretera !== filterCarretera) {
+      return false;
+    }
+    // Analista select filter
+    if (filterAnalista !== 'Seleccionar' && (record.analistaAsignado || 'Sin asignar') !== filterAnalista) {
       return false;
     }
     // Estado select filter
@@ -587,9 +598,9 @@ function clearFilters() {
   document.getElementById('filter-documento').value = '';
   document.getElementById('filter-cliente').value = '';
   document.getElementById('filter-concesionario').selectedIndex = 0;
-  document.getElementById('filter-tienda').selectedIndex = 0;
   document.getElementById('filter-ejecutivo').value = '';
   document.getElementById('filter-carretera').selectedIndex = 0;
+  if (document.getElementById('filter-analista')) document.getElementById('filter-analista').selectedIndex = 0;
   document.getElementById('filter-estado').selectedIndex = 0;
   document.getElementById('filter-fecha-desde').value = '';
   document.getElementById('filter-fecha-hasta').value = '';
@@ -648,8 +659,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const selectAndDateInputs = [
     'filter-concesionario',
-    'filter-tienda',
     'filter-carretera',
+    'filter-analista',
     'filter-estado',
     'filter-fecha-desde',
     'filter-fecha-hasta',
@@ -694,7 +705,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const solSelectAndDateInputs = [
     'sol-filter-concesionario',
-    'sol-filter-tienda',
+    'sol-filter-analista',
     'sol-filter-estado',
     'sol-filter-fecha-desde',
     'sol-filter-fecha-hasta',
@@ -905,6 +916,7 @@ function initSolicitudesFilterDropdowns() {
   const selects = {
     concesionario: new Set(),
     tienda: new Set(),
+    analista: new Set(['Sin asignar']),
     estado: new Set(['Pendiente', 'Aprobado', 'Observado', 'Rechazado', 'Deriv. Jefe', 'Mayor Inicial Requerida'])
   };
 
@@ -913,6 +925,7 @@ function initSolicitudesFilterDropdowns() {
   records.forEach(r => {
     if (r.concesionario) selects.concesionario.add(r.concesionario);
     if (r.tienda) selects.tienda.add(r.tienda);
+    selects.analista.add(r.analistaAsignado || 'Sin asignar');
     if (r.estado) selects.estado.add(getMappedEstado(r.estado));
   });
 
@@ -948,8 +961,8 @@ function getSolicitudesFiltradas() {
   const filterDocumento = document.getElementById('sol-filter-documento')?.value.trim().toLowerCase() || '';
   const filterCliente = document.getElementById('sol-filter-cliente')?.value.trim().toLowerCase() || '';
   const filterConcesionario = document.getElementById('sol-filter-concesionario')?.value || 'Seleccionar';
-  const filterTienda = document.getElementById('sol-filter-tienda')?.value || 'Seleccionar';
   const filterEjecutivo = document.getElementById('sol-filter-ejecutivo')?.value.trim().toLowerCase() || '';
+  const filterAnalista = document.getElementById('sol-filter-analista')?.value || 'Seleccionar';
   const filterEstado = document.getElementById('sol-filter-estado')?.value || 'Pendiente';
   const filterFechaDesde = document.getElementById('sol-filter-fecha-desde')?.value || '';
   const filterFechaHasta = document.getElementById('sol-filter-fecha-hasta')?.value || '';
@@ -961,8 +974,8 @@ function getSolicitudesFiltradas() {
     if (filterDocumento && !String(record.nDocumento || '').toLowerCase().includes(filterDocumento)) return false;
     if (filterCliente && !String(record.nombreCliente || '').toLowerCase().includes(filterCliente)) return false;
     if (filterConcesionario !== 'Seleccionar' && record.concesionario !== filterConcesionario) return false;
-    if (filterTienda !== 'Seleccionar' && record.tienda !== filterTienda) return false;
     if (filterEjecutivo && !String(record.usuarioEjecutivo || '').toLowerCase().includes(filterEjecutivo)) return false;
+    if (filterAnalista !== 'Seleccionar' && (record.analistaAsignado || 'Sin asignar') !== filterAnalista) return false;
     if (getMappedEstado(record.estado) !== estadoAplicado) return false;
 
     const recordDate = new Date(record.fechaIngresoRiesgos || record.fecha);
@@ -997,8 +1010,8 @@ function clearSolicitudesFilters() {
   setValue('sol-filter-documento', '');
   setValue('sol-filter-cliente', '');
   setValue('sol-filter-concesionario', 'Seleccionar');
-  setValue('sol-filter-tienda', 'Seleccionar');
   setValue('sol-filter-ejecutivo', '');
+  setValue('sol-filter-analista', 'Seleccionar');
   setValue('sol-filter-estado', 'Pendiente');
   setValue('sol-filter-fecha-desde', '');
   setValue('sol-filter-fecha-hasta', '');
@@ -1017,7 +1030,7 @@ function renderSolicitudesTable() {
   const solRecords = getSolicitudesFiltradas().sort((a, b) => new Date(b.fechaIngresoRiesgos || b.fecha) - new Date(a.fechaIngresoRiesgos || a.fecha));
 
   if (solRecords.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 2rem; color: var(--text-muted); font-weight: 600;">No existen solicitudes para los criterios de búsqueda ingresados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-muted); font-weight: 600;">No existen solicitudes para los criterios de búsqueda ingresados.</td></tr>`;
     if (totalCountEl) totalCountEl.textContent = '0';
     return;
   }
@@ -1028,6 +1041,8 @@ function renderSolicitudesTable() {
     const estadoType = getMappedEstadoType(r.estado);
     const estadoLabel = getMappedEstado(r.estado);
     const isPendiente = estadoLabel === 'Pendiente';
+    const asignadaAlAnalistaSesion = r.usuarioAnalista === usuarioAnalistaSesion;
+    const asignadaAOtroAnalista = !!r.usuarioAnalista && !asignadaAlAnalistaSesion;
 
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -1036,10 +1051,9 @@ function renderSolicitudesTable() {
       <td>${r.nDocumento}</td>
       <td style="font-weight: 600;">${r.nombreCliente}</td>
       <td>${r.concesionario}</td>
-      <td style="font-weight: 600; color: #0b4ec2;">${r.tienda}</td>
       <td style="font-weight: 600;">${r.usuarioEjecutivo}</td>
       <td>${fechaStr}</td>
-      <td>${r.etapa || 'Riesgos'}</td>
+      <td class="col-analista">${r.analistaAsignado || 'Sin asignar'}</td>
       <td>
         <span class="status-pill status-${estadoType}">
           ${statusIcons[estadoType] || ''}
@@ -1047,11 +1061,12 @@ function renderSolicitudesTable() {
         </span>
       </td>
       <td>
-        ${isPendiente ? `
+        ${isPendiente && !r.usuarioAnalista ? `
           <button class="btn-tomar" onclick="openTomarModal('${r.solicitud}')">
             <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             Tomar
-          </button>` : `
+          </button>` : asignadaAOtroAnalista ? `
+          <button class="btn-revisar" disabled title="Caso asignado a ${r.analistaAsignado || 'otro analista'}">Asignado</button>` : `
           <button class="btn-revisar" onclick="goToReview('${r.solicitud}')">Revisar</button>`}
       </td>
     `;
@@ -1084,12 +1099,19 @@ function confirmTomar() {
   closeTomarModal();
 
   records = JSON.parse(localStorage.getItem('efectiva_records')) || [...defaultRecords];
+  const solicitudActual = records.find(r => r.solicitud === solicitudSeleccionada);
+  if (solicitudActual?.usuarioAnalista && solicitudActual.usuarioAnalista !== usuarioAnalistaSesion) {
+    showToast(`La solicitud ${solicitudSeleccionada} ya fue tomada por ${solicitudActual.analistaAsignado}.`);
+    renderSolicitudesTable();
+    return;
+  }
+
   records = records.map(r => r.solicitud === solicitudSeleccionada ? {
     ...r,
     etapa: 'Riesgos',
     estado: r.estado || 'Pendiente',
     estadoType: r.estadoType || 'pendiente',
-    analistaAsignado: 'María Fe Cárdenas',
+    analistaAsignado: nombreAnalistaSesion,
     usuarioAnalista: usuarioAnalistaSesion
   } : r);
   localStorage.setItem('efectiva_records', JSON.stringify(records));
