@@ -682,6 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /* LOGIN EVENT LISTENERS TEMPORALMENTE COMENTADOS - conservar para reactivar después
   // Login Event Listeners
   document.getElementById('btnLoginSubmit')?.addEventListener('click', handleLogin);
   document.getElementById('btnLoginClear')?.addEventListener('click', clearLogin);
@@ -695,6 +696,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('loginUser')?.addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
   document.getElementById('loginPass')?.addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+  FIN LOGIN EVENT LISTENERS TEMPORALMENTE COMENTADOS */
 
   initSolicitudesFilterDropdowns();
   const solTextInputs = ['sol-filter-solicitud', 'sol-filter-documento', 'sol-filter-ejecutivo', 'sol-filter-cliente'];
@@ -719,6 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sol-btn-limpiar')?.addEventListener('click', clearSolicitudesFilters);
 });
 
+/* LÓGICA DE LOGIN TEMPORALMENTE COMENTADA - conservar para reactivar después
 // --- Lógica del Splash Screen & Login ---
 let loginAttempts = 0;
 const MAX_ATTEMPTS = 3;
@@ -834,6 +837,59 @@ function clearLogin() {
   if (userEl) userEl.value = '';
   if (passEl) passEl.value = '';
 }
+
+FIN LÓGICA DE LOGIN TEMPORALMENTE COMENTADA */
+
+// --- Inicio temporal sin login ---
+(function iniciarAplicacionSinLogin() {
+  const splash = document.getElementById('splashScreen');
+  const p1 = document.getElementById('splashPhase1');
+  const p2 = document.getElementById('splashPhase2');
+
+  if (p1 && p2) {
+    setTimeout(() => {
+      p1.style.opacity = '0';
+      setTimeout(() => {
+        p1.style.display = 'none';
+        p2.style.display = 'flex';
+        p2.offsetHeight; // force reflow
+        p2.style.opacity = '1';
+      }, 300);
+    }, 1000);
+  }
+
+  function mostrarAplicacionPrincipalSinLogin() {
+    const loginView = document.getElementById('loginView');
+    if (loginView) loginView.classList.add('hidden');
+
+    const appHeader = document.querySelector('.app-header');
+    if (appHeader) appHeader.classList.remove('hidden');
+
+    const revisarView = document.getElementById('revisar-view');
+    if (revisarView) revisarView.classList.add('hidden');
+
+    const bandejaView = document.getElementById('bandeja-view');
+    if (bandejaView) bandejaView.classList.add('hidden');
+
+    const solicitudesView = document.getElementById('solicitudes-view');
+    if (solicitudesView) solicitudesView.classList.remove('hidden');
+
+    initSolicitudesFilterDropdowns();
+    renderSolicitudesTable();
+  }
+
+  setTimeout(() => {
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(() => {
+        splash.remove();
+        mostrarAplicacionPrincipalSinLogin();
+      }, 500);
+    } else {
+      mostrarAplicacionPrincipalSinLogin();
+    }
+  }, 2000);
+})();
 
 // Global Toast notification helper
 function showToast(message, type = 'success') {
