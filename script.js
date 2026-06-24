@@ -220,6 +220,7 @@ const statusIcons = {
 
 const usuarioAnalistaSesion = 'mcardenas';
 const nombreAnalistaSesion = 'María Fe Cárdenas';
+const ESTADOS_FILTRO_SOLICITUDES = ['Pendiente', 'Observado', 'Rechazado', 'Aprobado'];
 const RECORDS_STORAGE_VERSION = 'analista-asignado-v2';
 
 // Reinicia la data mock una sola vez para que las solicitudes no nazcan tomadas por defecto.
@@ -303,7 +304,7 @@ function initFilterDropdowns() {
     tienda: new Set(),
     carretera: new Set(),
     analista: new Set(),
-    estado: new Set()
+    estado: new Set(ESTADOS_FILTRO_SOLICITUDES)
   };
 
   records.forEach(r => {
@@ -311,7 +312,8 @@ function initFilterDropdowns() {
     if (r.tienda) selects.tienda.add(r.tienda);
     if (r.carretera) selects.carretera.add(r.carretera);
     if (r.analistaAsignado) selects.analista.add(r.analistaAsignado);
-    if (r.estado) selects.estado.add(getMappedEstado(r.estado));
+    const estadoMapeado = getMappedEstado(r.estado);
+    if (ESTADOS_FILTRO_SOLICITUDES.includes(estadoMapeado)) selects.estado.add(estadoMapeado);
   });
 
   // Populate dropdown menus
@@ -325,7 +327,8 @@ function initFilterDropdowns() {
     }
     
     // Sort and append options
-    Array.from(set).sort().forEach(optionValue => {
+    const options = key === 'estado' ? ESTADOS_FILTRO_SOLICITUDES : Array.from(set).sort();
+    options.forEach(optionValue => {
       const option = document.createElement('option');
       option.value = optionValue;
       option.textContent = optionValue;
@@ -973,7 +976,7 @@ function initSolicitudesFilterDropdowns() {
     concesionario: new Set(),
     tienda: new Set(),
     analista: new Set(['Sin asignar']),
-    estado: new Set(['Pendiente', 'Aprobado', 'Observado', 'Rechazado', 'Deriv. Jefe', 'Mayor Inicial Requerida'])
+    estado: new Set(ESTADOS_FILTRO_SOLICITUDES)
   };
 
   records = JSON.parse(localStorage.getItem('efectiva_records')) || [...defaultRecords];
@@ -982,7 +985,8 @@ function initSolicitudesFilterDropdowns() {
     if (r.concesionario) selects.concesionario.add(r.concesionario);
     if (r.tienda) selects.tienda.add(r.tienda);
     selects.analista.add(r.analistaAsignado || 'Sin asignar');
-    if (r.estado) selects.estado.add(getMappedEstado(r.estado));
+    const estadoMapeado = getMappedEstado(r.estado);
+    if (ESTADOS_FILTRO_SOLICITUDES.includes(estadoMapeado)) selects.estado.add(estadoMapeado);
   });
 
   for (const [key, set] of Object.entries(selects)) {
@@ -993,11 +997,15 @@ function initSolicitudesFilterDropdowns() {
       selectEl.remove(1);
     }
 
-    Array.from(set).sort((a, b) => {
-      if (a === 'Pendiente') return -1;
-      if (b === 'Pendiente') return 1;
-      return a.localeCompare(b);
-    }).forEach(optionValue => {
+    const options = key === 'estado'
+      ? ESTADOS_FILTRO_SOLICITUDES
+      : Array.from(set).sort((a, b) => {
+          if (a === 'Pendiente') return -1;
+          if (b === 'Pendiente') return 1;
+          return a.localeCompare(b);
+        });
+
+    options.forEach(optionValue => {
       const option = document.createElement('option');
       option.value = optionValue;
       option.textContent = optionValue;

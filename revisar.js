@@ -331,72 +331,80 @@ const formSnapshot = {
     nombres: 'Juan',
     apellidoPaterno: 'Pérez',
     apellidoMaterno: 'García',
+    segmentoRiesgo: 'B',
     fechaNacimiento: '11/05/1995',
-    celular: '922159933',
+    celular: '',
     correo: '',
-    sexo: 'Masculino',
+    sexo: 'Seleccionar',
     nacionalidad: '',
     residencia: '',
     direccion: '',
-    departamento: 'LIMA',
-    provincia: 'LIMA',
-    distrito: 'MIRAFLORES',
-    estadoCivil: 'Soltero(a)',
-    separacionBienes: ''
+    departamento: 'Seleccionar',
+    provincia: 'Seleccionar',
+    distrito: 'Seleccionar',
+    estadoCivil: 'Seleccionar',
+    separacionBienes: 'Seleccionar'
   },
   laboral: {
-    categoria: 'Dependiente',
-    ruc: '1234564',
-    giro: 'Comercio',
-    cargo: 'Empleado',
-    fechaIngreso: '01/01/2021',
+    categoria: 'Seleccionar',
+    ruc: '',
+    nombreCentro: '',
+    direccion: '',
+    giro: 'Seleccionar',
+    cargo: 'Seleccionar',
+    fechaIngreso: '',
     moneda: 'Soles (S/)',
-    ingresos: 'S/ 30000.00'
+    ingresos: 'S/ 0.00'
   },
   ingresos: {
-    tipoCategoria: '4ta categoría',
-    perfil: 'Formal',
-    situacionLaboral: 'Dependiente',
-    fechaIngreso: '01/01/2019',
-    rucEmpleador: '20180569880',
-    ingresoNetoMensual: 'S/ 4,000.00',
+    ingresoEstimado: 'S/ 4,800.00',
+    tipoCategoria: 'Seleccionar',
+    perfil: 'Seleccionar',
+    situacionLaboral: 'Seleccionar',
+    fechaIngreso: '',
+    rucEmpleador: '',
+    ingresoNetoMensual: 'S/ 0.00',
     ingresoAnualizado: 'No',
-    totalTitular: 'S/ 4,000.00'
+    totalTitular: 'S/ 0.00'
   },
   vehiculo: {
     estado: 'Nuevo',
-    concesionario: 'HYUNDAI',
-    tienda: 'PURUCHUCO',
+    concesionario: 'Hyundai',
+    sucursal: 'Puruchuco',
+    tipoDocVendedor: 'DNI',
+    numeroDocVendedor: '',
     vendedor: 'ALOCHA',
     marca: 'Toyota',
     modelo: 'Corolla',
     anio: '2026',
-    tarjetaPropiedad: 'TITULAR'
+    tarjetaPropiedad: 'Titular'
   },
   credito: {
     producto: 'Crédito Vehicular',
     campana: 'SUV Mayo 2026',
-    moneda: 'Dólares ($)',
+    carretera: 'Full',
+    verificacion: 'Digital',
+    moneda: 'Soles (S/)',
     tipoCambio: '3.78',
     precioVehiculo: '$ 28,000.00',
     cuotaInicial: '$ 8,000.00',
     tea: '12.80%',
     plazo: '24 meses',
-    diaPago: '03'
+    diaPago: '03',
+    totalFinanciamiento: 'S/ 32,130.00'
   },
   gastos: {
     notariales: 'Sí',
-    registrales: 'Sí',
-    delivery: 'Sí',
+    registrales: '',
+    delivery: '',
     planGps: 'Premium',
     inclusionGps: '$ 650.00',
     kitMantenimiento: 'No',
     cuotasDobles: 'No',
-    portes: 'No',
-    totalFinanciamiento: '$ 21,480.00'
+    portes: 'No'
   },
   seguros: {
-    vehicular: 'Propio',
+    vehicular: '',
     costoVehicular: 'S/ 1,200.00',
     desgravamen: 'Sí',
     productoDesgravamen: 'Individual',
@@ -407,6 +415,39 @@ const formSnapshot = {
   }
 };
 
+function getRiskSegment(recordData) {
+  if (recordData?.segmentoRiesgo) return recordData.segmentoRiesgo;
+  if (recordData?.segmento) return recordData.segmento;
+
+  const carretera = (recordData?.carretera || '').toLowerCase();
+  if (carretera.includes('semi')) return 'B';
+  if (carretera.includes('full')) return 'A';
+  if (carretera.includes('express')) return 'C';
+  if (carretera.includes('escritorio')) return 'D';
+  return 'B';
+}
+
+function getVerificationType(recordData) {
+  if (recordData?.verificacion) return recordData.verificacion;
+  if (recordData?.tipoVerificacion) return recordData.tipoVerificacion;
+
+  const carretera = (recordData?.carretera || '').toLowerCase();
+  return (carretera.includes('express') || carretera.includes('escritorio')) ? 'Digital' : 'Física';
+}
+
+function formatSolesAmount(value) {
+  const amount = Number(value) || 0;
+  return `S/ ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function getEstimatedIncome(recordData) {
+  if (recordData?.ingresoEstimado) return formatSolesAmount(recordData.ingresoEstimado);
+
+  const hash = (recordData?.solicitud || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const amount = 3800 + (hash % 8) * 450;
+  return formatSolesAmount(amount);
+}
+
 function fieldBox(label, value, span = 1) {
   return `
     <div class="info-box" style="grid-column: span ${span};">
@@ -416,6 +457,7 @@ function fieldBox(label, value, span = 1) {
   `;
 }
 
+
 function sectionHtml(title, fields) {
   return `
     <h3 style="font-size: 0.9rem; font-weight: 800; color: #0b4ec2; margin-bottom: 1rem; border-bottom: 1.5px solid #eff6ff; padding-bottom: 0.5rem; text-transform: uppercase;">
@@ -424,6 +466,125 @@ function sectionHtml(title, fields) {
     <div class="info-box-grid">
       ${fields.map(([label, value, span]) => fieldBox(label, value, span || 1)).join('')}
     </div>
+  `;
+}
+
+function readonlyValue(value) {
+  if (value === undefined || value === null || String(value).trim() === '') return '—';
+  return value;
+}
+
+function escapeAttribute(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function copyIconSvg() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v12h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
+}
+
+function checkIconSvg() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+}
+
+function copyReadonlyValue(button) {
+  const value = button?.getAttribute('data-copy-value') || '';
+  const showCopiedState = () => {
+    button.classList.add('copied');
+    button.innerHTML = checkIconSvg();
+    button.setAttribute('aria-label', 'Copiado');
+
+    window.setTimeout(() => {
+      button.classList.remove('copied');
+      button.innerHTML = copyIconSvg();
+      button.setAttribute('aria-label', 'Copiar número de documento');
+    }, 1200);
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(value).then(showCopiedState).catch(() => copyReadonlyValueFallback(value, showCopiedState));
+    return;
+  }
+
+  copyReadonlyValueFallback(value, showCopiedState);
+}
+
+function copyReadonlyValueFallback(value, onSuccess) {
+  const textarea = document.createElement('textarea');
+  textarea.value = value;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    document.execCommand('copy');
+    onSuccess();
+  } finally {
+    document.body.removeChild(textarea);
+  }
+}
+
+function readonlyField(label, value, span = 1, required = false, copyable = false) {
+  const fieldValue = readonlyValue(value);
+  const controlHtml = copyable ? `
+      <div class="readonly-control readonly-copy-control">
+        <span class="readonly-copy-value">${fieldValue}</span>
+        <button type="button" class="readonly-copy-btn" data-copy-value="${escapeAttribute(fieldValue)}" onclick="copyReadonlyValue(this)" aria-label="Copiar número de documento" title="Copiar">
+          ${copyIconSvg()}
+        </button>
+      </div>` : `<div class="readonly-control">${fieldValue}</div>`;
+
+  return `
+    <div class="readonly-field" style="grid-column: span ${span};">
+      <label>${label}${required ? ' <span class="readonly-required">*</span>' : ''}</label>
+      ${controlHtml}
+    </div>
+  `;
+}
+
+function readonlySectionHtml(title, fields, description = '') {
+  return `
+    <section class="readonly-form-section">
+      <h3 class="readonly-section-title">${title}</h3>
+      ${description ? `<p class="readonly-section-desc">${description}</p>` : ''}
+      <div class="readonly-grid">
+        ${fields.map(([label, value, span, required, copyable]) => readonlyField(label, value, span || 1, !!required, !!copyable)).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function ingresosTitularSectionHtml() {
+  return `
+    <section class="readonly-form-section">
+      <h3 class="readonly-section-title">Ingresos</h3>
+      <p class="readonly-section-desc">Registro de ingresos declarados por el titular. Puedes añadir más de un ingreso.</p>
+      <div class="readonly-grid readonly-estimated-income-grid">
+        ${readonlyField('Ingreso estimado (S/.)', formSnapshot.ingresos.ingresoEstimado)}
+      </div>
+      <div class="readonly-income-card">
+        <div class="readonly-income-card-title">Ingresos del titular</div>
+        <div class="readonly-income-pill">Ingreso 1</div>
+        <div class="readonly-grid readonly-grid-income">
+          ${readonlyField('Tipo de categoría', formSnapshot.ingresos.tipoCategoria)}
+          ${readonlyField('Perfil', formSnapshot.ingresos.perfil)}
+          ${readonlyField('Situación laboral', formSnapshot.ingresos.situacionLaboral)}
+          ${readonlyField('Fecha de ingreso laboral', formSnapshot.ingresos.fechaIngreso)}
+          ${readonlyField('RUC del empleador', formSnapshot.ingresos.rucEmpleador)}
+          ${readonlyField('Ingreso neto mensual', formSnapshot.ingresos.ingresoNetoMensual)}
+          ${readonlyField('¿Ingreso anualizado?', formSnapshot.ingresos.ingresoAnualizado)}
+        </div>
+        <div class="readonly-income-total">
+          <span>Total ingresos titular:</span>
+          <strong>${readonlyValue(formSnapshot.ingresos.totalTitular)}</strong>
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -443,29 +604,32 @@ function switchTab(tabId) {
 
   switch (tabId) {
     case 'cliente': {
-      const datosClienteHtml = sectionHtml('Datos de cliente', [
+      const datosClienteHtml = readonlySectionHtml('Datos de cliente', [
         ['Tipo de documento', formSnapshot.cliente.tipoDocumento],
-        ['Número documento', formSnapshot.cliente.numeroDocumento],
+        ['Número documento', formSnapshot.cliente.numeroDocumento, 1, false, true],
         ['Nombres', formSnapshot.cliente.nombres],
         ['Apellido paterno', formSnapshot.cliente.apellidoPaterno],
         ['Apellido materno', formSnapshot.cliente.apellidoMaterno],
+        ['Segmento de riesgo', formSnapshot.cliente.segmentoRiesgo],
         ['Fecha de nacimiento', formSnapshot.cliente.fechaNacimiento],
-        ['Número de celular', formSnapshot.cliente.celular],
-        ['Correo electrónico', formSnapshot.cliente.correo || '—'],
+        ['Número de celular', formSnapshot.cliente.celular, 1, true],
+        ['Correo electrónico', formSnapshot.cliente.correo, 1, true],
         ['Sexo', formSnapshot.cliente.sexo],
-        ['Nacionalidad', formSnapshot.cliente.nacionalidad || '—'],
-        ['Residencia', formSnapshot.cliente.residencia || '—'],
-        ['Dirección de domicilio', formSnapshot.cliente.direccion || '—', 4],
-        ['Departamento', formSnapshot.cliente.departamento],
-        ['Provincia', formSnapshot.cliente.provincia],
-        ['Distrito', formSnapshot.cliente.distrito],
-        ['Estado civil', formSnapshot.cliente.estadoCivil],
-        ['Separación de bienes', formSnapshot.cliente.separacionBienes || '—']
+        ['Nacionalidad', formSnapshot.cliente.nacionalidad],
+        ['Residencia', formSnapshot.cliente.residencia],
+        ['Dirección de domicilio', formSnapshot.cliente.direccion, 4, true],
+        ['Departamento', formSnapshot.cliente.departamento, 1, true],
+        ['Provincia', formSnapshot.cliente.provincia, 1, true],
+        ['Distrito', formSnapshot.cliente.distrito, 1, true],
+        ['Estado civil', formSnapshot.cliente.estadoCivil, 1, true],
+        ['Separación de bienes', formSnapshot.cliente.separacionBienes]
       ]);
 
-      const datosLaboralesHtml = sectionHtml('Datos laborales', [
+      const datosLaboralesHtml = readonlySectionHtml('Datos laborales', [
         ['Categoría laboral', formSnapshot.laboral.categoria],
         ['RUC de empleador (no obligatorio)', formSnapshot.laboral.ruc],
+        ['Nombre centro de laboral', formSnapshot.laboral.nombreCentro],
+        ['Dirección', formSnapshot.laboral.direccion],
         ['Giro o actividad', formSnapshot.laboral.giro],
         ['Cargo', formSnapshot.laboral.cargo],
         ['Fecha ingreso laboral', formSnapshot.laboral.fechaIngreso],
@@ -475,22 +639,21 @@ function switchTab(tabId) {
 
       let datosConyugeHtml = '';
       if ((formSnapshot.cliente.estadoCivil || '').toLowerCase().includes('casad')) {
-        datosConyugeHtml = sectionHtml('Datos de cónyuge', [
-          ['Estado civil', formSnapshot.cliente.estadoCivil],
-          ['Separación de bienes', formSnapshot.cliente.separacionBienes || '—'],
-          ['Condición', 'Cónyuge requerido por estado civil Casado(a)'],
-          ['Información', 'Pendiente de registro en la solicitud', 2]
+        datosConyugeHtml = readonlySectionHtml('Datos de cónyuge', [
+          ['Tipo de documento', formSnapshot.conyuge?.tipoDocumento || '—'],
+          ['Número documento', formSnapshot.conyuge?.numeroDocumento || '—'],
+          ['Apellido paterno', formSnapshot.conyuge?.apellidoPaterno || '—'],
+          ['Apellido materno', formSnapshot.conyuge?.apellidoMaterno || '—'],
+          ['Fecha de nacimiento', formSnapshot.conyuge?.fechaNacimiento || '—']
         ]);
-      } else {
-        datosConyugeHtml = `<h3 style="font-size: 0.9rem; font-weight: 800; color: #0b4ec2; margin-bottom: 1rem; border-bottom: 1.5px solid #eff6ff; padding-bottom: 0.5rem; text-transform: uppercase;">Datos de cónyuge</h3>
-          <div class="info-box" style="max-width: 520px;"><span class="info-box-label">No aplica</span><span class="info-box-val">El cliente figura como ${formSnapshot.cliente.estadoCivil}; no se requiere información de cónyuge.</span></div>`;
       }
 
       html = `
-        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-          <section>${datosClienteHtml}</section>
-          <section>${datosLaboralesHtml}</section>
-          <section>${datosConyugeHtml}</section>
+        <div class="readonly-tab-stack">
+          ${datosClienteHtml}
+          ${datosLaboralesHtml}
+          ${ingresosTitularSectionHtml()}
+          ${datosConyugeHtml}
         </div>
       `;
       contentArea.innerHTML = html;
@@ -498,70 +661,62 @@ function switchTab(tabId) {
     }
 
     case 'comerciales': {
-      const datosComercialesHtml = sectionHtml('Datos comerciales', [
-        ['Concesionario', formSnapshot.vehiculo.concesionario],
-        ['Tienda', formSnapshot.vehiculo.tienda],
-        ['Vendedor', formSnapshot.vehiculo.vendedor],
-        ['Campaña comercial', formSnapshot.credito.campana],
-        ['Producto', formSnapshot.credito.producto],
-        ['Canal', record.canal || 'Ejecutivo'],
-        ['Usuario ejecutivo', record.usuarioEjecutivo || '—'],
-        ['Carretera', record.carretera || '—']
-      ]);
-
-      const datosVehiculoHtml = sectionHtml('Datos de vehículo', [
+      const datosVehiculoHtml = readonlySectionHtml('Datos de vehículo', [
         ['Estado vehículo', formSnapshot.vehiculo.estado],
         ['Concesionario', formSnapshot.vehiculo.concesionario],
-        ['Tienda', formSnapshot.vehiculo.tienda],
-        ['Vendedor', formSnapshot.vehiculo.vendedor],
+        ['Sucursal', formSnapshot.vehiculo.sucursal || formSnapshot.vehiculo.tienda],
+        ['Tipo Doc. vendedor', formSnapshot.vehiculo.tipoDocVendedor],
+        ['N° Doc vendedor', formSnapshot.vehiculo.numeroDocVendedor],
+        ['Nombre completo vendedor', formSnapshot.vehiculo.vendedor],
         ['Marca', formSnapshot.vehiculo.marca],
         ['Modelo', formSnapshot.vehiculo.modelo],
         ['Año modelo', formSnapshot.vehiculo.anio],
         ['Tarjeta propiedad a nombre de', formSnapshot.vehiculo.tarjetaPropiedad]
       ]);
 
-      const creditoHtml = sectionHtml('Crédito y simulación', [
+      const creditoHtml = readonlySectionHtml('Crédito y simulación', [
         ['Producto', formSnapshot.credito.producto],
         ['Campaña comercial', formSnapshot.credito.campana],
-        ['Moneda financiamiento', formSnapshot.credito.moneda],
-        ['Tipo cambio', formSnapshot.credito.tipoCambio],
-        ['Precio vehículo', formSnapshot.credito.precioVehiculo],
-        ['Cuota inicial', formSnapshot.credito.cuotaInicial],
+        ['Carretera', formSnapshot.credito.carretera],
+        ['Verificación', formSnapshot.credito.verificacion],
+        ['Moneda Financiamiento', formSnapshot.credito.moneda],
+        ['Tipo Cambio', formSnapshot.credito.tipoCambio],
+        ['Precio Vehículo', formSnapshot.credito.precioVehiculo],
+        ['Cuota Inicial', formSnapshot.credito.cuotaInicial],
         ['TEA', formSnapshot.credito.tea],
-        ['Plazo meses', formSnapshot.credito.plazo],
-        ['Día pago', formSnapshot.credito.diaPago]
+        ['Plazo Meses', formSnapshot.credito.plazo],
+        ['Día Pago', formSnapshot.credito.diaPago],
+        ['Total Financiamiento', formSnapshot.credito.totalFinanciamiento]
       ]);
 
-      const gastosHtml = sectionHtml('Gastos y plan GPS', [
-        ['Gastos notariales', formSnapshot.gastos.notariales],
-        ['Gastos registrales (sábana)', formSnapshot.gastos.registrales],
-        ['Gastos delivery firma', formSnapshot.gastos.delivery],
+      const gastosHtml = readonlySectionHtml('Gastos y plan GPS', [
+        ['Gastos Notariales', formSnapshot.gastos.notariales],
+        ['Gastos Registrales (sábana)', formSnapshot.gastos.registrales],
+        ['Gastos Delivery Firma', formSnapshot.gastos.delivery],
         ['Plan GPS', formSnapshot.gastos.planGps],
-        ['Gastos inclusión GPS (cálculo)', formSnapshot.gastos.inclusionGps],
-        ['Kit mantenimiento prepagado', formSnapshot.gastos.kitMantenimiento],
-        ['Cuotas dobles', formSnapshot.gastos.cuotasDobles],
-        ['Incluir portes', formSnapshot.gastos.portes],
-        ['Total financiamiento', formSnapshot.gastos.totalFinanciamiento]
+        ['Gastos Inclusión GPS (cálculo)', formSnapshot.gastos.inclusionGps],
+        ['Kit Mantenimiento prepagado', formSnapshot.gastos.kitMantenimiento],
+        ['Cuotas Dobles', formSnapshot.gastos.cuotasDobles],
+        ['Incluir Portes', formSnapshot.gastos.portes]
       ]);
 
-      const segurosHtml = sectionHtml('Seguros', [
-        ['Seguro vehicular', formSnapshot.seguros.vehicular],
-        ['Costo seguro vehicular', formSnapshot.seguros.costoVehicular],
-        ['Seguro desgravamen', formSnapshot.seguros.desgravamen],
-        ['Producto desgravamen', formSnapshot.seguros.productoDesgravamen],
-        ['Costo seguro desgravamen (cálculo)', formSnapshot.seguros.costoDesgravamen],
-        ['Seguro optativo', formSnapshot.seguros.optativo],
-        ['Costo seguro optativo', formSnapshot.seguros.costoOptativo],
-        ['Tipo seguro optativo', formSnapshot.seguros.tipoOptativo]
+      const segurosHtml = readonlySectionHtml('Seguros', [
+        ['Seguro Vehicular', formSnapshot.seguros.vehicular],
+        ['Costo Seguro Vehicular', formSnapshot.seguros.costoVehicular],
+        ['Seguro Desgravamen', formSnapshot.seguros.desgravamen],
+        ['Tipo de seguro desgravamen', formSnapshot.seguros.productoDesgravamen],
+        ['Costo Seguro Desgravamen (cálculo)', formSnapshot.seguros.costoDesgravamen],
+        ['Seguro Optativo', formSnapshot.seguros.optativo],
+        ['COSTO Seguro Optativo', formSnapshot.seguros.costoOptativo],
+        ['TIPO SEGURO OPTATIVO', formSnapshot.seguros.tipoOptativo]
       ]);
 
       html = `
-        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-          <section>${datosComercialesHtml}</section>
-          <section>${datosVehiculoHtml}</section>
-          <section>${creditoHtml}</section>
-          <section>${gastosHtml}</section>
-          <section>${segurosHtml}</section>
+        <div class="readonly-tab-stack">
+          ${datosVehiculoHtml}
+          ${creditoHtml}
+          ${gastosHtml}
+          ${segurosHtml}
         </div>
       `;
       contentArea.innerHTML = html;
@@ -980,6 +1135,11 @@ function initDetailView(id) {
 
   details = getRecordExtraDetails(record);
 
+  formSnapshot.credito.carretera = record.carretera || '—';
+  formSnapshot.credito.verificacion = getVerificationType(record);
+  formSnapshot.cliente.segmentoRiesgo = getRiskSegment(record);
+  formSnapshot.ingresos.ingresoEstimado = getEstimatedIncome(record);
+
   // Load checklist from localStorage if present
   const localChecklist = localStorage.getItem(`efectiva_checklist_${record.solicitud}`);
   let validChecklist = false;
@@ -1103,7 +1263,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('btn-observar')?.addEventListener('click', () => openDocModal('modal-observar'));
   document.getElementById('btn-rechazar')?.addEventListener('click', () => openDocModal('modal-rechazar'));
-  document.getElementById('btn-escalar')?.addEventListener('click', () => updateStatus('Deriv. Jefe', 'deriv'));
 });
 
 // Modal helpers for decisions
@@ -1347,7 +1506,6 @@ function updateDecisionButtonsVisibility() {
   const btnAprobar = document.getElementById('btn-aprobar');
   const btnObservar = document.getElementById('btn-observar');
   const btnRechazar = document.getElementById('btn-rechazar');
-  const btnEscalar = document.getElementById('btn-escalar');
 
   if (btnAprobar) {
     btnAprobar.style.display = 'flex';
@@ -1360,10 +1518,6 @@ function updateDecisionButtonsVisibility() {
   if (btnRechazar) {
     btnRechazar.style.display = 'flex';
     btnRechazar.disabled = !isEditable;
-  }
-  if (btnEscalar) {
-    btnEscalar.style.display = 'flex';
-    btnEscalar.disabled = !isEditable;
   }
 }
 
