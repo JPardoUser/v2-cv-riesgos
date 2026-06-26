@@ -324,7 +324,7 @@ let details = null;
 
 // Información capturada desde la solicitud para que Riesgos la visualice en modo solo lectura.
 // Se mantiene el look & feel existente y únicamente se reemplaza el contenido de las pestañas solicitadas.
-const formSnapshot = {
+const baseFormSnapshot = {
   cliente: {
     tipoDocumento: 'DNI',
     numeroDocumento: '70569533',
@@ -332,6 +332,7 @@ const formSnapshot = {
     apellidoPaterno: 'Pérez',
     apellidoMaterno: 'García',
     segmentoRiesgo: 'B',
+    mostrarSegmentoRiesgo: true,
     fechaNacimiento: '11/05/1995',
     celular: '',
     correo: '',
@@ -343,7 +344,17 @@ const formSnapshot = {
     provincia: 'Seleccionar',
     distrito: 'Seleccionar',
     estadoCivil: 'Seleccionar',
+    mancomunaIngresos: '',
     separacionBienes: 'Seleccionar'
+  },
+  conyuge: {
+    tipoDocumento: '',
+    numeroDocumento: '',
+    nombres: '',
+    apellidoPaterno: '',
+    apellidoMaterno: '',
+    fechaNacimiento: '',
+    nacionalidad: ''
   },
   laboral: {
     categoria: 'Seleccionar',
@@ -357,6 +368,7 @@ const formSnapshot = {
     ingresos: 'S/ 0.00'
   },
   ingresos: {
+    mostrarIngresoEstimado: true,
     ingresoEstimado: 'S/ 4,800.00',
     tipoCategoria: 'Seleccionar',
     perfil: 'Seleccionar',
@@ -367,6 +379,7 @@ const formSnapshot = {
     ingresoAnualizado: 'No',
     totalTitular: 'S/ 0.00'
   },
+  ingresosConyuge: null,
   vehiculo: {
     estado: 'Nuevo',
     concesionario: 'Hyundai',
@@ -383,7 +396,9 @@ const formSnapshot = {
     producto: 'Crédito Vehicular',
     campana: 'SUV Mayo 2026',
     carretera: 'Full',
+    mostrarCarretera: true,
     verificacion: 'Digital',
+    mostrarVerificacion: true,
     moneda: 'Soles (S/)',
     tipoCambio: '3.78',
     precioVehiculo: '$ 28,000.00',
@@ -399,6 +414,7 @@ const formSnapshot = {
     delivery: '',
     planGps: 'Premium',
     inclusionGps: '$ 650.00',
+    mostrarKitMantenimiento: true,
     kitMantenimiento: 'No',
     cuotasDobles: 'No',
     portes: 'No'
@@ -408,12 +424,263 @@ const formSnapshot = {
     costoVehicular: 'S/ 1,200.00',
     desgravamen: 'Sí',
     productoDesgravamen: 'Individual',
+    mostrarCamposExtra: true,
     costoDesgravamen: '$ 0.00',
     optativo: 'No',
     costoOptativo: 'NO',
     tipoOptativo: 'Seleccionar'
   }
 };
+
+// Valores solicitados para Evaluación Riesgos cuando la carretera es FULL.
+const fullFormSnapshot = {
+  cliente: {
+    tipoDocumento: 'DNI',
+    numeroDocumento: '70569533',
+    nombres: 'Juan',
+    apellidoPaterno: 'Pérez',
+    apellidoMaterno: 'García',
+    segmentoRiesgo: 'A',
+    mostrarSegmentoRiesgo: true,
+    fechaNacimiento: '11/05/1995',
+    celular: '988569966',
+    correo: 'prueba@gmail.com',
+    sexo: 'Masculino',
+    nacionalidad: 'Peruano',
+    residencia: 'Permanente',
+    direccion: 'AV. Las moras 123',
+    departamento: 'LIMA',
+    provincia: 'CAÑETE',
+    distrito: 'SAN VICENTE',
+    estadoCivil: 'Casado(a)',
+    mancomunaIngresos: 'Sí',
+    separacionBienes: 'No'
+  },
+  conyuge: {
+    tipoDocumento: 'DNI',
+    numeroDocumento: '705269833',
+    nombres: 'Maria',
+    apellidoPaterno: 'Flores',
+    apellidoMaterno: 'Gomez',
+    fechaNacimiento: '01/01/2001',
+    nacionalidad: 'Peruana'
+  },
+  laboral: {
+    categoria: 'Dependiente',
+    ruc: '20705896880',
+    nombreCentro: 'Grupo alicorp',
+    direccion: 'av. lima 123',
+    giro: 'Comercio',
+    cargo: 'Empleado',
+    fechaIngreso: '01/01/2020',
+    moneda: 'Soles (S/)',
+    ingresos: '6000.00'
+  },
+  ingresos: {
+    mostrarIngresoEstimado: true,
+    ingresoEstimado: 'S/ 5,150.00',
+    tipoCategoria: '5ta categoría',
+    perfil: 'Formal',
+    situacionLaboral: 'Dependiente',
+    fechaIngreso: '01/01/2021',
+    rucEmpleador: '20105698330',
+    ingresoNetoMensual: 'S/ 5,500.00',
+    ingresoAnualizado: 'No',
+    totalTitular: 'S/ 5,500.00'
+  },
+  ingresosConyuge: {
+    tipoCategoria: '4ta categoría',
+    perfil: 'Formal',
+    situacionLaboral: 'Dependiente',
+    fechaIngreso: '03/01/2023',
+    rucEmpleador: '20785698000',
+    ingresoNetoMensual: 'S/ 1,500.00',
+    ingresoAnualizado: 'No',
+    totalConyuge: 'S/ 1,500.00',
+    totalCombinado: 'S/ 7,000.00'
+  },
+  vehiculo: {
+    estado: 'Nuevo',
+    concesionario: 'Hyundai',
+    sucursal: 'Puruchuco',
+    tipoDocVendedor: 'DNI',
+    numeroDocVendedor: 'Ingrese documento',
+    vendedor: 'ALOCHA',
+    marca: 'Toyota',
+    modelo: 'Corolla',
+    anio: '2026',
+    tarjetaPropiedad: 'Titular'
+  },
+  credito: {
+    producto: 'Crédito Vehicular',
+    campana: 'SUV Mayo 2026',
+    carretera: 'Full',
+    mostrarCarretera: false,
+    verificacion: 'Digital',
+    mostrarVerificacion: false,
+    moneda: 'Soles (S/)',
+    tipoCambio: '3.78',
+    precioVehiculo: '$ 15,000.00',
+    cuotaInicial: '$ 6,500.00',
+    tea: '12.80%',
+    plazo: '24 meses',
+    diaPago: '03',
+    totalFinanciamiento: 'S/ 32,130.00'
+  },
+  gastos: {
+    notariales: 'Sí',
+    registrales: 'Sí',
+    delivery: 'Sí',
+    planGps: 'Premium',
+    inclusionGps: '$ 650.00',
+    mostrarKitMantenimiento: false,
+    kitMantenimiento: '',
+    cuotasDobles: 'No',
+    portes: 'No'
+  },
+  seguros: {
+    vehicular: 'Con seguro',
+    costoVehicular: '0.00%',
+    desgravamen: 'Con seguro',
+    productoDesgravamen: 'Individual',
+    mostrarCamposExtra: false,
+    costoDesgravamen: '',
+    optativo: '',
+    costoOptativo: '',
+    tipoOptativo: ''
+  }
+};
+
+// Valores solicitados para Evaluación Riesgos cuando la carretera es EXPRESS.
+const expressFormSnapshot = {
+  cliente: {
+    tipoDocumento: 'DNI',
+    numeroDocumento: '70569533',
+    nombres: 'Juan',
+    apellidoPaterno: 'Pérez',
+    apellidoMaterno: 'García',
+    segmentoRiesgo: 'C',
+    mostrarSegmentoRiesgo: true,
+    fechaNacimiento: '11/05/1995',
+    celular: '987458899',
+    correo: 'efectiva@efetibank.com.pe',
+    sexo: 'Masculino',
+    nacionalidad: 'Peruano',
+    residencia: 'Permanente',
+    direccion: 'av. Las pruebas 123',
+    departamento: 'LIMA',
+    provincia: 'LIMA',
+    distrito: 'MIRAFLORES',
+    estadoCivil: 'Soltero(a)',
+    mancomunaIngresos: undefined,
+    separacionBienes: undefined
+  },
+  conyuge: {
+    tipoDocumento: '',
+    numeroDocumento: '',
+    nombres: '',
+    apellidoPaterno: '',
+    apellidoMaterno: '',
+    fechaNacimiento: '',
+    nacionalidad: ''
+  },
+  laboral: {
+    categoria: 'Dependiente',
+    ruc: '20705695330',
+    nombreCentro: 'Grupo gloria',
+    direccion: 'av. los jazmines 123',
+    giro: 'Comercio',
+    cargo: 'Subgerente',
+    fechaIngreso: '01/01/2020',
+    moneda: 'Soles (S/)',
+    ingresos: '3500.00'
+  },
+  ingresos: {
+    mostrarIngresoEstimado: true,
+    ingresoEstimado: 'S/ 5,150.00',
+    tipoCategoria: 'Seleccionar',
+    perfil: 'Seleccionar',
+    situacionLaboral: 'Seleccionar',
+    fechaIngreso: '',
+    rucEmpleador: '',
+    ingresoNetoMensual: 'S/ 0.00',
+    ingresoAnualizado: 'No',
+    totalTitular: 'S/ 0.00'
+  },
+  ingresosConyuge: null,
+  vehiculo: {
+    estado: 'Nuevo',
+    concesionario: 'Hyundai',
+    sucursal: 'Puruchuco',
+    tipoDocVendedor: 'DNI',
+    numeroDocVendedor: '748578966',
+    vendedor: 'Alonso Gonzales Romero',
+    marca: 'Toyota',
+    modelo: 'Corolla',
+    anio: '2026',
+    tarjetaPropiedad: 'Titular'
+  },
+  credito: {
+    producto: 'Crédito Vehicular',
+    campana: 'SUV Mayo 2026',
+    carretera: 'Express',
+    mostrarCarretera: false,
+    verificacion: 'Digital',
+    mostrarVerificacion: false,
+    moneda: 'Soles (S/.)',
+    tipoCambio: '3.78',
+    precioVehiculo: '$ 15,000.00',
+    cuotaInicial: '$ 6,500.00',
+    tea: '12.80%',
+    plazo: '60 meses',
+    diaPago: '03',
+    totalFinanciamiento: 'S/ 32,130.00'
+  },
+  gastos: {
+    notariales: 'Sí',
+    registrales: 'Sí',
+    delivery: 'Sí',
+    planGps: 'Premium',
+    inclusionGps: '$ 650.00',
+    mostrarKitMantenimiento: false,
+    kitMantenimiento: '',
+    cuotasDobles: 'Sí',
+    mesesCuotasDobles: 'Agosto / Enero',
+    portes: 'No'
+  },
+  seguros: {
+    vehicular: 'Con seguro',
+    costoVehicular: '12.10%',
+    desgravamen: 'Con seguro',
+    productoDesgravamen: 'Individual',
+    mostrarCamposExtra: false,
+    costoDesgravamen: '',
+    optativo: '',
+    costoOptativo: '',
+    tipoOptativo: ''
+  }
+};
+
+
+let formSnapshot = cloneFormSnapshot(baseFormSnapshot);
+
+function cloneFormSnapshot(snapshot) {
+  return JSON.parse(JSON.stringify(snapshot));
+}
+
+function isFullRoad(recordData) {
+  return String(recordData?.carretera || '').trim().toLowerCase() === 'full';
+}
+
+function isExpressRoad(recordData) {
+  return String(recordData?.carretera || '').trim().toLowerCase() === 'express';
+}
+
+function getFormSnapshotByRoad(recordData) {
+  if (isFullRoad(recordData)) return fullFormSnapshot;
+  if (isExpressRoad(recordData)) return expressFormSnapshot;
+  return baseFormSnapshot;
+}
 
 function getRiskSegment(recordData) {
   if (recordData?.segmentoRiesgo) return recordData.segmentoRiesgo;
@@ -559,33 +826,56 @@ function readonlySectionHtml(title, fields, description = '') {
   `;
 }
 
-function ingresosTitularSectionHtml() {
+function readonlyIncomeCardHtml(title, incomeData, totalLabel, totalValue, description = '') {
+  return `
+      <div class="readonly-income-card">
+        <div class="readonly-income-card-title">${title}</div>
+        ${description ? `<p class="readonly-section-desc" style="margin-top:-0.35rem; margin-bottom:0.65rem;">${description}</p>` : ''}
+        <div class="readonly-income-pill">Ingreso 1</div>
+        <div class="readonly-grid readonly-grid-income">
+          ${readonlyField('Tipo de categoría', incomeData?.tipoCategoria)}
+          ${readonlyField('Perfil', incomeData?.perfil)}
+          ${readonlyField('Situación laboral', incomeData?.situacionLaboral)}
+          ${readonlyField('Fecha de ingreso laboral', incomeData?.fechaIngreso)}
+          ${readonlyField('RUC del empleador', incomeData?.rucEmpleador)}
+          ${readonlyField('Ingreso neto mensual', incomeData?.ingresoNetoMensual)}
+          ${readonlyField('¿Ingreso anualizado?', incomeData?.ingresoAnualizado)}
+        </div>
+        <div class="readonly-income-total">
+          <span>${totalLabel}</span>
+          <strong>${readonlyValue(totalValue)}</strong>
+        </div>
+      </div>
+  `;
+}
+
+function ingresosSectionHtml() {
+  const hasConyugeIncome = !!formSnapshot.ingresosConyuge;
+
   return `
     <section class="readonly-form-section">
       <h3 class="readonly-section-title">Ingresos</h3>
       <p class="readonly-section-desc">Registro de ingresos declarados por el titular. Puedes añadir más de un ingreso.</p>
+      ${formSnapshot.ingresos.mostrarIngresoEstimado === false ? '' : `
       <div class="readonly-grid readonly-estimated-income-grid">
         ${readonlyField('Ingreso estimado (S/.)', formSnapshot.ingresos.ingresoEstimado)}
-      </div>
-      <div class="readonly-income-card">
-        <div class="readonly-income-card-title">Ingresos del titular</div>
-        <div class="readonly-income-pill">Ingreso 1</div>
-        <div class="readonly-grid readonly-grid-income">
-          ${readonlyField('Tipo de categoría', formSnapshot.ingresos.tipoCategoria)}
-          ${readonlyField('Perfil', formSnapshot.ingresos.perfil)}
-          ${readonlyField('Situación laboral', formSnapshot.ingresos.situacionLaboral)}
-          ${readonlyField('Fecha de ingreso laboral', formSnapshot.ingresos.fechaIngreso)}
-          ${readonlyField('RUC del empleador', formSnapshot.ingresos.rucEmpleador)}
-          ${readonlyField('Ingreso neto mensual', formSnapshot.ingresos.ingresoNetoMensual)}
-          ${readonlyField('¿Ingreso anualizado?', formSnapshot.ingresos.ingresoAnualizado)}
+      </div>`}
+      ${readonlyIncomeCardHtml('Ingresos del titular', formSnapshot.ingresos, 'Total ingresos titular:', formSnapshot.ingresos.totalTitular)}
+      ${hasConyugeIncome ? `
+        ${readonlyIncomeCardHtml('Ingresos del conyugue', formSnapshot.ingresosConyuge, 'Total ingresos conyugue:', formSnapshot.ingresosConyuge.totalConyuge, 'Registra los ingresos declarados por el conyuge o conviviente. Puedes añadir más de un ingreso.')}
+        <div class="readonly-income-total" style="margin-top:0.75rem; border-top:1px solid #e2e8f0;">
+          <span>Total ingresos titular + conyugue:</span>
+          <strong>${readonlyValue(formSnapshot.ingresosConyuge.totalCombinado)}</strong>
         </div>
-        <div class="readonly-income-total">
-          <span>Total ingresos titular:</span>
-          <strong>${readonlyValue(formSnapshot.ingresos.totalTitular)}</strong>
-        </div>
-      </div>
+      ` : ''}
     </section>
   `;
+}
+
+function ingresoEstimadoSectionHtml() {
+  return readonlySectionHtml('Ingresos', [
+    ['Ingreso estimado (S/.)', formSnapshot.ingresos.ingresoEstimado]
+  ]);
 }
 
 // Tab switching logic
@@ -604,13 +894,17 @@ function switchTab(tabId) {
 
   switch (tabId) {
     case 'cliente': {
-      const datosClienteHtml = readonlySectionHtml('Datos de cliente', [
+      const clienteFields = [
         ['Tipo de documento', formSnapshot.cliente.tipoDocumento],
         ['Número documento', formSnapshot.cliente.numeroDocumento, 1, false, true],
         ['Nombres', formSnapshot.cliente.nombres],
         ['Apellido paterno', formSnapshot.cliente.apellidoPaterno],
-        ['Apellido materno', formSnapshot.cliente.apellidoMaterno],
-        ['Segmento de riesgo', formSnapshot.cliente.segmentoRiesgo],
+        ['Apellido materno', formSnapshot.cliente.apellidoMaterno]
+      ];
+      if (formSnapshot.cliente.mostrarSegmentoRiesgo !== false) {
+        clienteFields.push(['Segmento de riesgo', formSnapshot.cliente.segmentoRiesgo]);
+      }
+      clienteFields.push(
         ['Fecha de nacimiento', formSnapshot.cliente.fechaNacimiento],
         ['Número de celular', formSnapshot.cliente.celular, 1, true],
         ['Correo electrónico', formSnapshot.cliente.correo, 1, true],
@@ -621,9 +915,16 @@ function switchTab(tabId) {
         ['Departamento', formSnapshot.cliente.departamento, 1, true],
         ['Provincia', formSnapshot.cliente.provincia, 1, true],
         ['Distrito', formSnapshot.cliente.distrito, 1, true],
-        ['Estado civil', formSnapshot.cliente.estadoCivil, 1, true],
-        ['Separación de bienes', formSnapshot.cliente.separacionBienes]
-      ]);
+        ['Estado civil', formSnapshot.cliente.estadoCivil, 1, true]
+      );
+      if (formSnapshot.cliente.mancomunaIngresos !== undefined) {
+        clienteFields.push(['Mancomuna ingresos', formSnapshot.cliente.mancomunaIngresos]);
+      }
+      if (formSnapshot.cliente.separacionBienes !== undefined) {
+        clienteFields.push(['Separación de bienes', formSnapshot.cliente.separacionBienes]);
+      }
+
+      const datosClienteHtml = readonlySectionHtml('Datos de cliente', clienteFields);
 
       const datosLaboralesHtml = readonlySectionHtml('Datos laborales', [
         ['Categoría laboral', formSnapshot.laboral.categoria],
@@ -642,18 +943,20 @@ function switchTab(tabId) {
         datosConyugeHtml = readonlySectionHtml('Datos de cónyuge', [
           ['Tipo de documento', formSnapshot.conyuge?.tipoDocumento || '—'],
           ['Número documento', formSnapshot.conyuge?.numeroDocumento || '—'],
+          ['Nombres', formSnapshot.conyuge?.nombres || '—'],
           ['Apellido paterno', formSnapshot.conyuge?.apellidoPaterno || '—'],
           ['Apellido materno', formSnapshot.conyuge?.apellidoMaterno || '—'],
-          ['Fecha de nacimiento', formSnapshot.conyuge?.fechaNacimiento || '—']
+          ['Fecha de nacimiento', formSnapshot.conyuge?.fechaNacimiento || '—'],
+          ['Nacionalidad', formSnapshot.conyuge?.nacionalidad || '—']
         ]);
       }
 
       html = `
         <div class="readonly-tab-stack">
           ${datosClienteHtml}
-          ${datosLaboralesHtml}
-          ${ingresosTitularSectionHtml()}
           ${datosConyugeHtml}
+          ${datosLaboralesHtml}
+          ${isExpressRoad(record) ? ingresoEstimadoSectionHtml() : ingresosSectionHtml()}
         </div>
       `;
       contentArea.innerHTML = html;
@@ -674,11 +977,17 @@ function switchTab(tabId) {
         ['Tarjeta propiedad a nombre de', formSnapshot.vehiculo.tarjetaPropiedad]
       ]);
 
-      const creditoHtml = readonlySectionHtml('Crédito y simulación', [
+      const creditoFields = [
         ['Producto', formSnapshot.credito.producto],
-        ['Campaña comercial', formSnapshot.credito.campana],
-        ['Carretera', formSnapshot.credito.carretera],
-        ['Verificación', formSnapshot.credito.verificacion],
+        ['Campaña comercial', formSnapshot.credito.campana]
+      ];
+      if (formSnapshot.credito.mostrarCarretera !== false) {
+        creditoFields.push(['Carretera', formSnapshot.credito.carretera]);
+      }
+      if (formSnapshot.credito.mostrarVerificacion !== false) {
+        creditoFields.push(['Verificación', formSnapshot.credito.verificacion]);
+      }
+      creditoFields.push(
         ['Moneda Financiamiento', formSnapshot.credito.moneda],
         ['Tipo Cambio', formSnapshot.credito.tipoCambio],
         ['Precio Vehículo', formSnapshot.credito.precioVehiculo],
@@ -687,29 +996,41 @@ function switchTab(tabId) {
         ['Plazo Meses', formSnapshot.credito.plazo],
         ['Día Pago', formSnapshot.credito.diaPago],
         ['Total Financiamiento', formSnapshot.credito.totalFinanciamiento]
-      ]);
+      );
+      const creditoHtml = readonlySectionHtml('Crédito y simulación', creditoFields);
 
-      const gastosHtml = readonlySectionHtml('Gastos y plan GPS', [
+      const gastosFields = [
         ['Gastos Notariales', formSnapshot.gastos.notariales],
         ['Gastos Registrales (sábana)', formSnapshot.gastos.registrales],
         ['Gastos Delivery Firma', formSnapshot.gastos.delivery],
         ['Plan GPS', formSnapshot.gastos.planGps],
-        ['Gastos Inclusión GPS (cálculo)', formSnapshot.gastos.inclusionGps],
-        ['Kit Mantenimiento prepagado', formSnapshot.gastos.kitMantenimiento],
-        ['Cuotas Dobles', formSnapshot.gastos.cuotasDobles],
-        ['Incluir Portes', formSnapshot.gastos.portes]
-      ]);
+        ['Gastos Inclusión GPS (cálculo)', formSnapshot.gastos.inclusionGps]
+      ];
+      if (formSnapshot.gastos.mostrarKitMantenimiento !== false) {
+        gastosFields.push(['Kit Mantenimiento prepagado', formSnapshot.gastos.kitMantenimiento]);
+      }
+      gastosFields.push(['Cuotas Dobles', formSnapshot.gastos.cuotasDobles]);
+      if (formSnapshot.gastos.mesesCuotasDobles !== undefined) {
+        gastosFields.push(['Meses de cuotas dobles', formSnapshot.gastos.mesesCuotasDobles]);
+      }
+      gastosFields.push(['Incluir Portes', formSnapshot.gastos.portes]);
+      const gastosHtml = readonlySectionHtml('Gastos y plan GPS', gastosFields);
 
-      const segurosHtml = readonlySectionHtml('Seguros', [
+      const segurosFields = [
         ['Seguro Vehicular', formSnapshot.seguros.vehicular],
         ['Costo Seguro Vehicular', formSnapshot.seguros.costoVehicular],
         ['Seguro Desgravamen', formSnapshot.seguros.desgravamen],
-        ['Tipo de seguro desgravamen', formSnapshot.seguros.productoDesgravamen],
-        ['Costo Seguro Desgravamen (cálculo)', formSnapshot.seguros.costoDesgravamen],
-        ['Seguro Optativo', formSnapshot.seguros.optativo],
-        ['COSTO Seguro Optativo', formSnapshot.seguros.costoOptativo],
-        ['TIPO SEGURO OPTATIVO', formSnapshot.seguros.tipoOptativo]
-      ]);
+        ['Tipo de seguro desgravamen', formSnapshot.seguros.productoDesgravamen]
+      ];
+      if (formSnapshot.seguros.mostrarCamposExtra !== false) {
+        segurosFields.push(
+          ['Costo Seguro Desgravamen (cálculo)', formSnapshot.seguros.costoDesgravamen],
+          ['Seguro Optativo', formSnapshot.seguros.optativo],
+          ['COSTO Seguro Optativo', formSnapshot.seguros.costoOptativo],
+          ['TIPO SEGURO OPTATIVO', formSnapshot.seguros.tipoOptativo]
+        );
+      }
+      const segurosHtml = readonlySectionHtml('Seguros', segurosFields);
 
       html = `
         <div class="readonly-tab-stack">
@@ -1135,10 +1456,15 @@ function initDetailView(id) {
 
   details = getRecordExtraDetails(record);
 
-  formSnapshot.credito.carretera = record.carretera || '—';
+  formSnapshot = cloneFormSnapshot(getFormSnapshotByRoad(record));
+  formSnapshot.credito.carretera = record.carretera || formSnapshot.credito.carretera || '—';
   formSnapshot.credito.verificacion = getVerificationType(record);
   formSnapshot.cliente.segmentoRiesgo = getRiskSegment(record);
-  formSnapshot.ingresos.ingresoEstimado = getEstimatedIncome(record);
+  if (formSnapshot.ingresos.mostrarIngresoEstimado !== false) {
+    formSnapshot.ingresos.ingresoEstimado = record.ingresoEstimado
+      ? getEstimatedIncome(record)
+      : (formSnapshot.ingresos.ingresoEstimado || getEstimatedIncome(record));
+  }
 
   // Load checklist from localStorage if present
   const localChecklist = localStorage.getItem(`efectiva_checklist_${record.solicitud}`);
